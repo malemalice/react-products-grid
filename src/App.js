@@ -8,10 +8,10 @@ const { Header, Content, Footer } = Layout;
 const App = ()=> {
   return (
     <Layout className="layout">
-      <Header style={{ background: '#fff', padding: '0 325px' }}>
+      <Header style={{ background: '#fff', padding: '0 275px' }}>
         <Icon className={'trigger'} type={'menu-fold'} /> ASCII STORE
       </Header>
-    <Content style={{ padding: '0 350px' }}>
+    <Content style={{ padding: '0 300px' }}>
       <Breadcrumb style={{ margin: '16px 0' }}>
         <Breadcrumb.Item>Home</Breadcrumb.Item>
         <Breadcrumb.Item>Products Page</Breadcrumb.Item>
