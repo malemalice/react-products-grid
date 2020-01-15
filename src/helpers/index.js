@@ -7,37 +7,26 @@ module.exports = {
         var seconds = Math.floor((new Date() - date) / 1000);
         var intervalType;
 
-        var interval = Math.floor(seconds / 31536000);
+        var interval = Math.floor(seconds / 604800);
         if (interval >= 1) {
-          intervalType = 'year';
+          return date.toDateString();
         } else {
-          interval = Math.floor(seconds / 2592000);
+          interval = Math.floor(seconds / 86400);
           if (interval >= 1) {
-            intervalType = 'month';
+            intervalType = 'day';
           } else {
-            interval = Math.floor(seconds / 604800);
+            interval = Math.floor(seconds / 3600);
             if (interval >= 1) {
-              intervalType = 'week';
+              intervalType = "hour";
             } else {
-              interval = Math.floor(seconds / 86400);
+              interval = Math.floor(seconds / 60);
               if (interval >= 1) {
-                intervalType = 'day';
+                intervalType = "minute";
               } else {
-                interval = Math.floor(seconds / 3600);
-                if (interval >= 1) {
-                  intervalType = "hour";
-                } else {
-                  interval = Math.floor(seconds / 60);
-                  if (interval >= 1) {
-                    intervalType = "minute";
-                  } else {
-                    interval = seconds;
-                    intervalType = "second";
-                  }
-                }
+                interval = seconds;
+                intervalType = "second";
               }
             }
-
           }
         }
 
@@ -46,5 +35,9 @@ module.exports = {
         }
 
         return interval + ' ' + intervalType + ' ago';
+    },
+    toDollars: (cents)=>{
+      var dollars = cents / 100;
+      return dollars = dollars.toLocaleString("en-US", {style:"currency", currency:"USD"});
     }
 }

@@ -3,7 +3,7 @@ import StackGrid from "react-stack-grid"
 import { Empty, Card, Skeleton, Loading, Avatar } from 'antd'
 import useAxios from '../hooks/useAxios'
 import '../App.css'
-import {timeAgo} from '../helpers'
+import {timeAgo, toDollars} from '../helpers'
 
 const { Meta } = Card
 
@@ -120,7 +120,7 @@ const List = ()=> {
           cover={<p className={'card-cover'} style={{fontSize:item.size+'px'}}>{item.face}</p>}
           bodyStyle={{padding:'14px',borderTop: '1px dotted #e8e8e8'}}
         >
-          <Meta title={item.price+'¢'} description={timeAgo(item.date)} />
+          <Meta title={toDollars(item.price)} description={timeAgo(item.date)} />
         </Card>
       </div>
     ))
