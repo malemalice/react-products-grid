@@ -3,6 +3,7 @@ import StackGrid from "react-stack-grid"
 import { Empty, Card, Skeleton, Loading, Avatar } from 'antd'
 import useAxios from '../hooks/useAxios'
 import '../App.css'
+import {timeAgo, toDollars} from '../helpers'
 
 const { Meta } = Card
 
@@ -30,55 +31,6 @@ const List = ()=> {
     url: `api/products/${deleteId}`,
     method: 'DELETE',
   })
-
-  const timeAgo = (date) => {
-    if (typeof date !== 'object') {
-        date = new Date(date);
-      }
-
-      var seconds = Math.floor((new Date() - date) / 1000);
-      var intervalType;
-
-      var interval = Math.floor(seconds / 31536000);
-      if (interval >= 1) {
-        intervalType = 'year';
-      } else {
-        interval = Math.floor(seconds / 2592000);
-        if (interval >= 1) {
-          intervalType = 'month';
-        } else {
-          interval = Math.floor(seconds / 604800);
-          if (interval >= 1) {
-            intervalType = 'week';
-          } else {
-            interval = Math.floor(seconds / 86400);
-            if (interval >= 1) {
-              intervalType = 'day';
-            } else {
-              interval = Math.floor(seconds / 3600);
-              if (interval >= 1) {
-                intervalType = "hour";
-              } else {
-                interval = Math.floor(seconds / 60);
-                if (interval >= 1) {
-                  intervalType = "minute";
-                } else {
-                  interval = seconds;
-                  intervalType = "second";
-                }
-              }
-            }
-          }
-
-        }
-      }
-
-      if (interval > 1 || interval === 0) {
-        intervalType += 's';
-      }
-
-      return interval + ' ' + intervalType + ' ago';
-  }
 
   const fetch = () => {
     listSend(
@@ -168,7 +120,7 @@ const List = ()=> {
           cover={<p className={'card-cover'} style={{fontSize:item.size+'px'}}>{item.face}</p>}
           bodyStyle={{padding:'14px',borderTop: '1px dotted #e8e8e8'}}
         >
-          <Meta title={item.price+'¢'} description={timeAgo(item.date)} />
+          <Meta title={toDollars(item.price)} description={timeAgo(item.date)} />
         </Card>
       </div>
     ))
