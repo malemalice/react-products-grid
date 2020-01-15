@@ -39,5 +39,13 @@ module.exports = {
     toDollars: (cents)=>{
       var dollars = cents / 100;
       return dollars = dollars.toLocaleString("en-US", {style:"currency", currency:"USD"});
-    }
+    },
+    generateAdsId:(n)=>{
+      var arr = [];
+      while(arr.length < n){
+          var r = Math.floor(Math.random() * 1000) + 1;
+          if(arr.indexOf(r) === -1) arr.push(r);
+      }
+      return arr;
+    },
 }

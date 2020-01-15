@@ -2,8 +2,9 @@ import React, { useState, useEffect, Fragment, useRef } from 'react'
 import StackGrid from "react-stack-grid"
 import { Empty, Card, Skeleton, Loading, Avatar } from 'antd'
 import useAxios from '../hooks/useAxios'
+import useUrlBuilder from '../hooks/useUrlBuilder'
 import '../App.css'
-import {timeAgo, toDollars} from '../helpers'
+import {timeAgo, toDollars, generateAdsId} from '../helpers'
 
 const { Meta } = Card
 
@@ -12,6 +13,7 @@ const List = ()=> {
   const [params, setParams] = useState({
     _page: 1,
     _limit: 15,
+    _max: 100,
   })
 
   const [response, setResponse] = useState({
@@ -23,8 +25,18 @@ const List = ()=> {
     results: [],
   })
 
+  const [ads,setAds] = useState({
+    adsId:generateAdsId(100),
+    adsUrl: useUrlBuilder(`ads`)
+  })
+
   const [listState, listSend] = useAxios({
     url: `api/products`,
+  })
+
+  const [adsState, adsSend] = useAxios({
+    url: `ads`,
+    method:'GET'
   })
 
   const [deleteState, deleteSend] = useAxios({
@@ -40,7 +52,6 @@ const List = ()=> {
       (response) => {
         setResponse((prevState) => ({
           ...prevState,
-          // results: response
           results:prevState && prevState.results.concat(response),
         }))
       }
@@ -91,9 +102,9 @@ const List = ()=> {
     const wrappedElement = document.getElementById('scrollcontainer');
     if (isBottom(wrappedElement)) {
       if(!listState.isFetching){
-        console.log(listState.isFetching)
-        console.log('header bottom reached');
-        console.log(params._page)
+        // console.log(listState.isFetching)
+        // console.log('header bottom reached');
+        // console.log(params._page)
         loadMore()
       }
     }
@@ -112,17 +123,36 @@ const List = ()=> {
     ))
   }
 
+  const showAds = (item,index) => {
+      if( index > 0 && (index%20===0)){
+        const order = index/20
+        const adsId = ads.adsId[order]
+        return (<div key={item.id+'-ads'}>
+          <Card
+            hoverable
+            cover={<img alt="example" src={`${ads.adsUrl}?r=${adsId}`} />}
+            bodyStyle={{display:"none"}}
+          >
+          </Card>
+        </div>)
+      }
+  }
+
   const showItems = () => {
-    return  response.results.map((item)=>(
-      <div key={item.id}>
-        <Card
-          hoverable
-          cover={<p className={'card-cover'} style={{fontSize:item.size+'px'}}>{item.face}</p>}
-          bodyStyle={{padding:'14px',borderTop: '1px dotted #e8e8e8'}}
-        >
-          <Meta title={toDollars(item.price)} description={timeAgo(item.date)} />
-        </Card>
-      </div>
+    console.log('hey')
+    return  response.results.map((item,index)=>(
+      <Fragment>
+        {showAds(item,index)}
+        <div key={item.id}>
+          <Card
+            hoverable
+            cover={<p className={'card-cover'} style={{fontSize:item.size+'px'}}>{item.face}</p>}
+            bodyStyle={{padding:'14px',borderTop: '1px dotted #e8e8e8'}}
+          >
+            <Meta title={toDollars(item.price)} description={timeAgo(item.date)} />
+          </Card>
+        </div>
+      </Fragment>
     ))
   }
 
