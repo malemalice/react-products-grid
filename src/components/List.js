@@ -1,8 +1,9 @@
-import React, { useState, useEffect, Fragment } from 'react'
+import React, { useState, useEffect, Fragment, useRef } from 'react'
 import StackGrid from "react-stack-grid"
 import { Empty, Card, Skeleton, Loading, Avatar } from 'antd'
 import useAxios from '../hooks/useAxios'
 import '../App.css'
+import {timeAgo, toDollars} from '../helpers'
 
 const { Meta } = Card
 
@@ -31,55 +32,6 @@ const List = ()=> {
     method: 'DELETE',
   })
 
-  const timeAgo = (date) => {
-    if (typeof date !== 'object') {
-        date = new Date(date);
-      }
-
-      var seconds = Math.floor((new Date() - date) / 1000);
-      var intervalType;
-
-      var interval = Math.floor(seconds / 31536000);
-      if (interval >= 1) {
-        intervalType = 'year';
-      } else {
-        interval = Math.floor(seconds / 2592000);
-        if (interval >= 1) {
-          intervalType = 'month';
-        } else {
-          interval = Math.floor(seconds / 604800);
-          if (interval >= 1) {
-            intervalType = 'week';
-          } else {
-            interval = Math.floor(seconds / 86400);
-            if (interval >= 1) {
-              intervalType = 'day';
-            } else {
-              interval = Math.floor(seconds / 3600);
-              if (interval >= 1) {
-                intervalType = "hour";
-              } else {
-                interval = Math.floor(seconds / 60);
-                if (interval >= 1) {
-                  intervalType = "minute";
-                } else {
-                  interval = seconds;
-                  intervalType = "second";
-                }
-              }
-            }
-          }
-
-        }
-      }
-
-      if (interval > 1 || interval === 0) {
-        intervalType += 's';
-      }
-
-      return interval + ' ' + intervalType + ' ago';
-  }
-
   const fetch = () => {
     listSend(
       {
@@ -88,20 +40,62 @@ const List = ()=> {
       (response) => {
         setResponse((prevState) => ({
           ...prevState,
-          results:response,
+          // results: response
+          results:prevState && prevState.results.concat(response),
         }))
       }
     )
+  }
+
+  const loadMore = () => {
+    setParams((prevState) => ({
+      ...prevState,
+      _page:prevState._page+1,
+    }))
   }
 
   useEffect(() => {
     fetch()
   }, [params])
 
-  const scrollCheck = (event) => {
-    const bottom = event.target.scrollHeight - event.target.scrollTop === event.target.clientHeight;
-    if (bottom) {
-      console.log("At The Bottom"); //Add in what you want here
+  const prevScrollY = useRef(0);
+
+  const [goingUp, setGoingUp] = useState(false);
+
+  const limitScroll = Math.max( document.body.scrollHeight) - 401;
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (prevScrollY.current < currentScrollY && goingUp) {
+        setGoingUp(false);
+      }
+      if (prevScrollY.current > currentScrollY && !goingUp) {
+        setGoingUp(true);
+      }
+      prevScrollY.current = currentScrollY;
+      // console.log(goingUp, currentScrollY);
+      // console.log(limitScroll)
+      trackScrolling()
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [goingUp]);
+
+  const isBottom = (el) => {
+    return el.getBoundingClientRect().bottom <= window.innerHeight;
+  }
+
+  const trackScrolling = () => {
+    const wrappedElement = document.getElementById('scrollcontainer');
+    if (isBottom(wrappedElement)) {
+      if(!listState.isFetching){
+        console.log(listState.isFetching)
+        console.log('header bottom reached');
+        console.log(params._page)
+        loadMore()
+      }
     }
   };
 
@@ -119,9 +113,6 @@ const List = ()=> {
   }
 
   const showItems = () => {
-    if(listState.isFetching){
-      return itemSkeleton()
-    }
     return  response.results.map((item)=>(
       <div key={item.id}>
         <Card
@@ -129,19 +120,23 @@ const List = ()=> {
           cover={<p className={'card-cover'} style={{fontSize:item.size+'px'}}>{item.face}</p>}
           bodyStyle={{padding:'14px',borderTop: '1px dotted #e8e8e8'}}
         >
-          <Meta title={item.price+'¢'} description={timeAgo(item.date)} />
+          <Meta title={toDollars(item.price)} description={timeAgo(item.date)} />
         </Card>
       </div>
     ))
   }
 
   return (
-    <div onScroll={scrollCheck}>
-      <StackGrid>
+    <Fragment>
+      <StackGrid columnWidth={200}>
         {showItems()}
+        {listState.isFetching && (
+          itemSkeleton()
+        )}
       </StackGrid>
-    </div>
-
+      <div id="scrollcontainer">
+      </div>
+    </Fragment>
   );
 }
 
