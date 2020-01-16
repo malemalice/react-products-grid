@@ -53,6 +53,10 @@ const List = ()=> {
           ...prevState,
           results:prevState && prevState.results.concat(response),
         }))
+      },
+      (e)=>{
+        console.log('ERROR!')
+        console.log(e)
       }
     )
   }

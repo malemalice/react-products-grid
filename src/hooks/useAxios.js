@@ -3,15 +3,6 @@ import axios from 'axios'
 
 // Import hooks
 import useUrlBuilder from './useUrlBuilder'
-// import useAlert from './useAlert'
-// Import Contexts
-// import SessionContext from '@/contexts/Session'
-
-// type Params = {
-//   url: string,
-//   params: any,
-//   options: any,
-// }
 
 export default ({
   method = 'GET',
@@ -31,9 +22,6 @@ export default ({
 
   // Define state first
   const [state, setState] = useState(initialState)
-
-  // Get keycloak context
-  // const session = useContext(SessionContext)
 
   // Define url
   const url = useUrlBuilder(_url)
@@ -59,11 +47,6 @@ export default ({
     'Content-Type': 'application/json',
     ..._headers,
   }
-
-  // Set authorization headers if request is authenticated
-  // if (options.authenticated && session.token) {
-  //   headers.Authorization = `${options.authenticationPrefix} ${session.token}`
-  // }
 
   // Set params headers
   args.headers = headers
@@ -94,9 +77,6 @@ export default ({
               data: response.data,
             }))
 
-            // console.log(response)
-            // useAlert(response)
-
             if (successCb) successCb(response.data)
           }
         })
@@ -119,8 +99,6 @@ export default ({
             message,
             data,
           }))
-
-          // useAlert(error.response)
 
           if (errorCb) errorCb({ statusCode, code, message })
         })
