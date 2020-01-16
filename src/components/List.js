@@ -1,6 +1,6 @@
 import React, { useState, useEffect, Fragment, useRef } from 'react'
 import StackGrid from "react-stack-grid"
-import { Empty, Card, Skeleton, Loading, Avatar, Row, Col, Select } from 'antd'
+import { Empty, Card, Skeleton, Loading, Avatar, Row, Col, Select, Spin } from 'antd'
 import useAxios from '../hooks/useAxios'
 import useUrlBuilder from '../hooks/useUrlBuilder'
 import '../App.css'
@@ -10,7 +10,9 @@ const { Meta } = Card
 const { Option } = Select
 
 const List = ()=> {
-  const [deleteId, setDeleteId] = useState(null)
+  const [common, setCommon] = useState({
+    isLoading: false
+  })
   const [params, setParams] = useState({
     _page: 1,
     _limit: 15,
@@ -39,11 +41,6 @@ const List = ()=> {
   const [adsState, adsSend] = useAxios({
     url: `ads`,
     method:'GET'
-  })
-
-  const [deleteState, deleteSend] = useAxios({
-    url: `api/products/${deleteId}`,
-    method: 'DELETE',
   })
 
   const fetch = () => {
@@ -126,7 +123,7 @@ const List = ()=> {
       if( index > 0 && (index%20===0)){
         const order = index/20
         const adsId = ads.adsId[order]
-        return (<div key={item.id+'-ads'}>
+        return (<div key={adsId}>
           <Card
             hoverable
             cover={<img alt="example" src={`${ads.adsUrl}?r=${adsId}`} />}
@@ -169,17 +166,25 @@ const List = ()=> {
           ...prevState,
           results:response,
         }))
+        toggleLoading()
       }
     )
   }
 
+  const toggleLoading = () =>{
+    setCommon((prevState)=>({
+      ...prevState,
+      isLoading: !prevState.isLoading,
+    }))
+  }
+
   const changeSort = (value)=> {
+    toggleLoading()
     setParams((prevState) => ({
       ...prevState,
       _sort:value,
     }),fetchSort(value))
   }
-
 
   return (
     <Fragment>
@@ -194,14 +199,16 @@ const List = ()=> {
         </Col>
       </Row>
       <Row>
-        <StackGrid columnWidth={200}>
-          {showItems()}
-          {listState.isFetching && (
-            itemSkeleton()
-          )}
-        </StackGrid>
-        <div id="scrollcontainer">
-        </div>
+        <Spin spinning={common.isLoading}>
+          <StackGrid columnWidth={200}>
+            {showItems()}
+            {listState.isFetching && (
+              itemSkeleton()
+            )}
+          </StackGrid>
+          <div id="scrollcontainer">
+          </div>
+        </Spin>
       </Row>
     </Fragment>
   )
